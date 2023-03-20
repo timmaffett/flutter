@@ -279,6 +279,7 @@ class IconTreeShaker {
       '--class-name', 'IconData',
       '--annotation-class-name', '_StaticIconProvider',
       '--annotation-class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
+      '--font-family-report'
     ];
     _logger.printTrace('Running command: ${cmd.join(' ')}');
     final ProcessResult constFinderProcessResult = await _processManager.run(cmd);
@@ -331,6 +332,31 @@ class IconTreeShaker {
       result[key] ??= <int>[];
       result[key]!.add(codePoint.round());
     }
+    // Now included annotated font families which MAY NOT have been referenced in any other way
+    for (final String fontPackageFamilyString in constants.annotatedFontFamilies) {
+      final List<String> packageAndFamily = fontPackageFamilyString.split(':');
+      final String? package = packageAndFamily[0].isEmpty ? null : packageAndFamily[0];
+      final String fontFamily = packageAndFamily[1];
+ 
+      if ((package ?? '') is! String || // Null is ok here.
+          fontFamily.isEmpty) {
+        throw IconTreeShakerException._(
+          'Invalid ConstFinder result. Expected "fontPackage" to be a String, '
+          '"fontFamily" to be a non empty String, '
+          'got: package:$package fontFamily:$fontFamily (from "$fontPackageFamilyString.")');
+      }
+      final String family = fontFamily;
+      final String key = package == null
+        ? family
+        : 'packages/$package/$family';
+      if(!result.containsKey(key)) {
+        // This is an otherwise UNREFERENCED font family, so FORCE a reference to it so that it can
+        // be tree shaken.
+        result[key] ??= <int>[];
+        result[key]!.add(0); // use 0 as a dummy code point
+      }
+    }
+
     return result;
   }
 }
@@ -348,6 +374,11 @@ class _ConstFinderResult {
   late final List<Map<String, Object?>> nonConstantLocations = _getList(
     result['nonConstantLocations'],
     'Invalid ConstFinder output: Expected "nonConstLocations" to be a list of objects',
+  );
+
+  late final List<Map<String, Object?>> annotatedFontFamilies = _getList(
+    result['annotatedFontFamilies'] ?? <String>[],
+    'Invalid ConstFinder output: Expected "annotatedFontFamilies" to be a list of strings.',
   );
 
   bool get hasNonConstantLocations => nonConstantLocations.isNotEmpty;
