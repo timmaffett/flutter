@@ -10,6 +10,7 @@
 #include "flutter/lib/ui/painting/fragment_program.h"
 
 #include "flutter/assets/asset_manager.h"
+#include "flutter/fml/mapping.h"
 #include "flutter/fml/trace_event.h"
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/impeller/display_list/dl_runtime_effect_impeller.h"  // nogncheck
@@ -43,34 +44,25 @@ static std::string RuntimeStageBackendToString(
   }
 }
 
-std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
-  FML_TRACE_EVENT("flutter", "FragmentProgram::initFromAsset", "asset",
-                  asset_name);
-  UIDartState* ui_dart_state = UIDartState::Current();
-  std::shared_ptr<AssetManager> asset_manager =
-      ui_dart_state->platform_configuration()->client()->GetAssetManager();
+  return "";
+}
 
-  std::unique_ptr<fml::Mapping> data = asset_manager->GetAsMapping(asset_name);
-  if (data == nullptr) {
-    return std::string("Asset '") + asset_name + std::string("' not found");
-  }
-
+std::string FragmentProgram::Init(std::unique_ptr<fml::Mapping> data) {
   auto runtime_stages =
       impeller::RuntimeStage::DecodeRuntimeStages(std::move(data));
 
   if (runtime_stages.empty()) {
-    return std::string("Asset '") + asset_name +
-           std::string("' does not contain any shader data.");
+    return "Data does not contain any shader data.";
   }
 
+  UIDartState* ui_dart_state = UIDartState::Current();
   impeller::RuntimeStageBackend backend =
       ui_dart_state->GetRuntimeStageBackend();
   std::shared_ptr<impeller::RuntimeStage> runtime_stage =
       runtime_stages[backend];
   if (!runtime_stage) {
     std::ostringstream stream;
-    stream << "Asset '" << asset_name
-           << "' does not contain appropriate runtime stage data for current "
+    stream << "Data does not contain appropriate runtime stage data for current "
               "backend ("
            << RuntimeStageBackendToString(backend) << ")." << std::endl
            << "Found stages: ";
@@ -116,8 +108,11 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
     SkRuntimeEffect::Result result =
         SkRuntimeEffect::MakeForShader(SkString(sksl, code_size));
     if (result.effect == nullptr) {
-      return std::string("Invalid SkSL:\n") + sksl +
-             std::string("\nSkSL Error:\n") + result.errorText.c_str();
+      return std::string("Invalid SkSL:
+") + sksl +
+             std::string("
+SkSL Error:
+") + result.errorText.c_str();
     }
     runtime_effect_ = DlRuntimeEffectSkia::Make(result.effect);
   }
@@ -144,6 +139,33 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
   }
 
   return "";
+}
+
+std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
+  FML_TRACE_EVENT("flutter", "FragmentProgram::initFromAsset", "asset",
+                  asset_name);
+  UIDartState* ui_dart_state = UIDartState::Current();
+  std::shared_ptr<AssetManager> asset_manager =
+      ui_dart_state->platform_configuration()->client()->GetAssetManager();
+
+  std::unique_ptr<fml::Mapping> data = asset_manager->GetAsMapping(asset_name);
+  if (data == nullptr) {
+    return std::string("Asset '") + asset_name + std::string("' not found");
+  }
+
+  return Init(std::move(data));
+}
+
+std::string FragmentProgram::initFromBytes(const std::vector<uint8_t>& bytes) {
+  FML_TRACE_EVENT("flutter", "FragmentProgram::initFromBytes", "size",
+                  bytes.size());
+
+  std::unique_ptr<fml::Mapping> data = std::make_unique<fml::DataMapping>(bytes);
+  if (!data) {
+    return "Failed to create mapping from byte data.";
+  }
+
+  return Init(std::move(data));
 }
 
 std::shared_ptr<DlColorSource> FragmentProgram::MakeDlColorSource(

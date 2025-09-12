@@ -31,6 +31,8 @@ class FragmentProgram : public RefCountedDartWrappable<FragmentProgram> {
 
   std::string initFromAsset(const std::string& asset_name);
 
+  std::string initFromBytes(const std::vector<uint8_t>& bytes);
+
   fml::RefPtr<FragmentShader> shader(Dart_Handle shader,
                                      Dart_Handle uniforms_handle,
                                      Dart_Handle samplers);
@@ -45,6 +47,7 @@ class FragmentProgram : public RefCountedDartWrappable<FragmentProgram> {
 
  private:
   FragmentProgram();
+  std::string Init(std::unique_ptr<fml::Mapping> data);
   sk_sp<DlRuntimeEffect> runtime_effect_;
 };
 

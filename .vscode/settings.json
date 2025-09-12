@@ -5,5 +5,10 @@
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
     ],
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#0D3234",
+        "titleBar.activeBackground": "#134748",
+        "titleBar.activeForeground": "#F3FCFC"
+    }
 }

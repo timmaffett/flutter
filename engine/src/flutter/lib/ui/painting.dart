@@ -5203,6 +5203,19 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     }());
   }
 
+  @pragma('vm:entry-point')
+  FragmentProgram._fromData(Uint8List bytes) {
+    _constructor();
+    final String result = _initFromBytes(bytes);
+    if (result.isNotEmpty) {
+      throw Exception(result);
+    }
+    assert(() {
+      _debugName = 'fromData';
+      return true;
+    }());
+  }
+
   String? _debugName;
 
   /// Creates a fragment program from the asset with key [assetKey].
@@ -5224,6 +5237,24 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
     return Future<FragmentProgram>.microtask(() {
       final FragmentProgram program = FragmentProgram._fromAsset(encodedKey);
       _shaderRegistry[encodedKey] = program;
+      return program;
+    });
+  }
+
+  /// Creates a fragment program from the provided byte data.
+  ///
+  /// The byte data must be produced as the output of the `impellerc`
+  /// compiler. The constructed object should then be reused via the
+  /// [fragmentShader] method to create [Shader] objects that can be used by
+  /// [Paint.shader].
+  static Future<FragmentProgram> fromData(String nameForShaderRegistry, Uint8List bytes) {
+    final FragmentProgram? program = _shaderRegistry[nameForShaderRegistry];
+    if (program != null) {
+      return Future<FragmentProgram>.value(program);
+    }
+    return Future<FragmentProgram>.microtask(() {
+      final FragmentProgram program = FragmentProgram._fromData(bytes);
+      _shaderRegistry[nameForShaderRegistry] = program;
       return program;
     });
   }
@@ -5262,6 +5293,9 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
 
   @Native<Handle Function(Pointer<Void>, Handle)>(symbol: 'FragmentProgram::initFromAsset')
   external String _initFromAsset(String assetKey);
+
+  @Native<Handle Function(Pointer<Void>, Handle)>(symbol: 'FragmentProgram::initFromBytes')
+  external String _initFromBytes(Uint8List bytes);
 
   /// Returns a fresh instance of [FragmentShader].
   FragmentShader fragmentShader() => FragmentShader._(this, debugName: _debugName);
