@@ -11,6 +11,7 @@
 
 #include "fml/backtrace.h"
 #include "impeller/core/runtime_types.h"
+#include "impeller/compiler/shader_bundle.h"
 #include "inja/inja.hpp"
 
 #include "impeller/base/validation.h"
@@ -370,6 +371,7 @@ RuntimeStageData::CreateMultiStageFlatbuffer() const {
   // The high level object API is used here for writing to the buffer. This is
   // just a convenience.
   auto runtime_stages = std::make_unique<fb::RuntimeStagesT>();
+  runtime_stages->format_version = impeller::compiler::kRuntimeStagesFormatVersion;
 
   for (const auto& kvp : data_) {
     auto runtime_stage = CreateStageFlatbuffer(kvp.first);

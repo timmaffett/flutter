@@ -12,6 +12,11 @@
 namespace impeller {
 namespace compiler {
 
+// Version constants for flatbuffer formats
+static constexpr uint32_t kShaderBundleFormatVersion = 1;
+static constexpr uint32_t kShaderArchiveFormatVersion = 1;
+static constexpr uint32_t kRuntimeStagesFormatVersion = 1;
+
 /// @brief  Parse a shader bundle configuration from a given JSON string.
 ///
 /// @note   Exposed only for testing purposes. Use `GenerateShaderBundle`

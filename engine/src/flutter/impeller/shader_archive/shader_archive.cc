@@ -10,6 +10,7 @@
 
 #include "impeller/base/validation.h"
 #include "impeller/shader_archive/shader_archive_flatbuffers.h"
+#include "impeller/compiler/shader_bundle.h"
 
 namespace impeller {
 
@@ -39,6 +40,14 @@ ShaderArchive::ShaderArchive(std::shared_ptr<fml::Mapping> payload)
 
   auto shader_archive = fb::GetShaderArchive(payload_->GetMapping());
   if (!shader_archive) {
+    return;
+  }
+
+  // Check format version compatibility
+  if (shader_archive->format_version() != impeller::compiler::kShaderArchiveFormatVersion) {
+    VALIDATION_LOG << "Unsupported shader archive format version: "
+                   << shader_archive->format_version()
+                   << ". Expected: " << impeller::compiler::kShaderArchiveFormatVersion;
     return;
   }
 

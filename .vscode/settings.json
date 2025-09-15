@@ -10,5 +10,9 @@
         "activityBar.background": "#0D3234",
         "titleBar.activeBackground": "#134748",
         "titleBar.activeForeground": "#F3FCFC"
+    },
+    "files.associations": {
+        "chrono": "cpp",
+        "utility": "cpp"
     }
 }

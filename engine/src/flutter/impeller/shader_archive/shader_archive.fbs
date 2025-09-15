@@ -17,6 +17,7 @@ table ShaderBlob {
 }
 
 table ShaderArchive {
+  format_version:uint;
   items: [ShaderBlob];
 }
 

@@ -10,6 +10,7 @@
 
 #include "flutter/fml/build_config.h"
 #include "impeller/shader_archive/shader_archive_flatbuffers.h"
+#include "impeller/compiler/shader_bundle.h"
 
 namespace impeller {
 
@@ -106,6 +107,7 @@ constexpr fb::Stage ToStage(ArchiveShaderType type) {
 
 std::shared_ptr<fml::Mapping> ShaderArchiveWriter::CreateMapping() const {
   fb::ShaderArchiveT shader_archive;
+  shader_archive.format_version = impeller::compiler::kShaderArchiveFormatVersion;
   for (const auto& shader_description : shader_descriptions_) {
     auto mapping = shader_description.mapping;
     if (!mapping) {

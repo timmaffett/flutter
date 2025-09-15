@@ -80,6 +80,7 @@ table RuntimeStage {
 }
 
 table RuntimeStages {
+  format_version:uint;
   sksl: RuntimeStage;
   metal: RuntimeStage;
   opengles: RuntimeStage;
