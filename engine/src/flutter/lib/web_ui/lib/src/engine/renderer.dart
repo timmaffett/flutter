@@ -202,6 +202,7 @@ abstract class Renderer {
 
   void clearFragmentProgramCache();
   Future<ui.FragmentProgram> createFragmentProgram(String assetKey);
+  Future<ui.FragmentProgram> createFragmentProgramFromBuffer(String nameForShaderRegistry, Uint8List buffer);
 
   ui.Path createPath();
   ui.Path copyPath(ui.Path src);

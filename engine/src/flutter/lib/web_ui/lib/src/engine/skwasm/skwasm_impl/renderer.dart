@@ -440,6 +440,16 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
+  Future<ui.FragmentProgram> createFragmentProgramFromBuffer(String nameForShaderRegistry, Uint8List buffer) {
+    if (_programs.containsKey(nameForShaderRegistry)) {
+      return _programs[nameForShaderRegistry]!;
+    }
+    return _programs[nameForShaderRegistry] = Future.value(
+      SkwasmFragmentProgram.fromBytes(nameForShaderRegistry, buffer),
+    );
+  }
+
+  @override
   ui.LineMetrics createLineMetrics({
     required bool hardBreak,
     required double ascent,
