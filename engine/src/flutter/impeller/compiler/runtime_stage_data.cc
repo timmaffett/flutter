@@ -11,7 +11,6 @@
 
 #include "fml/backtrace.h"
 #include "impeller/core/runtime_types.h"
-#include "impeller/compiler/shader_bundle.h"
 #include "inja/inja.hpp"
 
 #include "impeller/base/validation.h"
