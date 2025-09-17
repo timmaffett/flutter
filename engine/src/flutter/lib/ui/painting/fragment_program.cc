@@ -44,15 +44,13 @@ static std::string RuntimeStageBackendToString(
   }
 }
 
-  return "";
-}
-
-std::string FragmentProgram::Init(std::unique_ptr<fml::Mapping> data) {
+std::string FragmentProgram::Init(const std::string& asset_name, std::unique_ptr<fml::Mapping> data) {
   auto runtime_stages =
       impeller::RuntimeStage::DecodeRuntimeStages(std::move(data));
 
   if (runtime_stages.empty()) {
-    return "Data does not contain any shader data.";
+    return std::string("Asset '") + asset_name +
+           std::string("' does not contain any shader data.");
   }
 
   UIDartState* ui_dart_state = UIDartState::Current();
@@ -62,7 +60,8 @@ std::string FragmentProgram::Init(std::unique_ptr<fml::Mapping> data) {
       runtime_stages[backend];
   if (!runtime_stage) {
     std::ostringstream stream;
-    stream << "Data does not contain appropriate runtime stage data for current "
+    stream << "Asset '" << asset_name
+           << "' does not contain appropriate runtime stage data for current "
               "backend ("
            << RuntimeStageBackendToString(backend) << ")." << std::endl
            << "Found stages: ";
@@ -108,11 +107,8 @@ std::string FragmentProgram::Init(std::unique_ptr<fml::Mapping> data) {
     SkRuntimeEffect::Result result =
         SkRuntimeEffect::MakeForShader(SkString(sksl, code_size));
     if (result.effect == nullptr) {
-      return std::string("Invalid SkSL:
-") + sksl +
-             std::string("
-SkSL Error:
-") + result.errorText.c_str();
+      return std::string("Invalid SkSL:\n") + sksl +
+             std::string("\nSkSL Error:\n") + result.errorText.c_str();
     }
     runtime_effect_ = DlRuntimeEffectSkia::Make(result.effect);
   }
@@ -153,19 +149,19 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
     return std::string("Asset '") + asset_name + std::string("' not found");
   }
 
-  return Init(std::move(data));
+  return Init(asset_name, std::move(data));
 }
 
-std::string FragmentProgram::initFromBytes(const std::vector<uint8_t>& bytes) {
+std::string FragmentProgram::initFromBytes(const std::string& asset_name, std::vector<uint8_t> bytes) {
   FML_TRACE_EVENT("flutter", "FragmentProgram::initFromBytes", "size",
                   bytes.size());
 
-  std::unique_ptr<fml::Mapping> data = std::make_unique<fml::DataMapping>(bytes);
+  auto data = std::make_unique<fml::DataMapping>(std::move(bytes)); 
   if (!data) {
     return "Failed to create mapping from byte data.";
   }
 
-  return Init(std::move(data));
+  return Init(asset_name, std::move(data));
 }
 
 std::shared_ptr<DlColorSource> FragmentProgram::MakeDlColorSource(

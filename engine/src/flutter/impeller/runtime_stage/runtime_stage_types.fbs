@@ -4,6 +4,14 @@
 
 namespace impeller.fb;
 
+
+// This is the runtime stage format version number - it's value should be
+// incremented any time there is a change to this file which changes the flat
+// buffer format.
+enum RuntimeStagesFormatVersion:uint32 {
+  kVersion = 1
+}
+
 enum Stage:byte {
   kVertex,
   kFragment,
@@ -80,7 +88,7 @@ table RuntimeStage {
 }
 
 table RuntimeStages {
-  format_version:uint;
+  format_version: uint32;  // this is intended to hold RuntimeStagesFormatVersion.kVersion
   sksl: RuntimeStage;
   metal: RuntimeStage;
   opengles: RuntimeStage;

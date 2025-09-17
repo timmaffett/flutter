@@ -5204,14 +5204,14 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   }
 
   @pragma('vm:entry-point')
-  FragmentProgram._fromData(Uint8List bytes) {
+  FragmentProgram._fromBuffer(String nameForShaderRegistry, Uint8List bytes) {
     _constructor();
-    final String result = _initFromBytes(bytes);
+    final String result = _initFromBytes(nameForShaderRegistry, bytes);
     if (result.isNotEmpty) {
       throw Exception(result);
     }
     assert(() {
-      _debugName = 'fromData';
+      _debugName = nameForShaderRegistry;
       return true;
     }());
   }
@@ -5247,13 +5247,13 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   /// compiler. The constructed object should then be reused via the
   /// [fragmentShader] method to create [Shader] objects that can be used by
   /// [Paint.shader].
-  static Future<FragmentProgram> fromData(String nameForShaderRegistry, Uint8List bytes) {
+  static Future<FragmentProgram> fromBuffer(String nameForShaderRegistry, Uint8List bytes) {
     final FragmentProgram? program = _shaderRegistry[nameForShaderRegistry];
     if (program != null) {
       return Future<FragmentProgram>.value(program);
     }
     return Future<FragmentProgram>.microtask(() {
-      final FragmentProgram program = FragmentProgram._fromData(bytes);
+      final FragmentProgram program = FragmentProgram._fromBuffer(nameForShaderRegistry,bytes);
       _shaderRegistry[nameForShaderRegistry] = program;
       return program;
     });
@@ -5294,8 +5294,8 @@ base class FragmentProgram extends NativeFieldWrapperClass1 {
   @Native<Handle Function(Pointer<Void>, Handle)>(symbol: 'FragmentProgram::initFromAsset')
   external String _initFromAsset(String assetKey);
 
-  @Native<Handle Function(Pointer<Void>, Handle)>(symbol: 'FragmentProgram::initFromBytes')
-  external String _initFromBytes(Uint8List bytes);
+  @Native<Handle Function(Pointer<Void>, Handle, Handle)>(symbol: 'FragmentProgram::initFromBytes')
+  external String _initFromBytes(String nameForShaderRegistry, Uint8List bytes);
 
   /// Returns a fresh instance of [FragmentShader].
   FragmentShader fragmentShader() => FragmentShader._(this, debugName: _debugName);

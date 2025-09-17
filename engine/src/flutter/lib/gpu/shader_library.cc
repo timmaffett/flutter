@@ -16,7 +16,6 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
-#include "impeller/compiler/shader_bundle.h"
 #include "lib/gpu/context.h"
 
 namespace flutter {
@@ -187,10 +186,10 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
   }
 
   // Check format version compatibility
-  if (bundle->format_version() != impeller::compiler::kShaderBundleFormatVersion) {
+  if (bundle->format_version() != static_cast<uint32_t>(impeller::fb::shaderbundle::ShaderBundleFormatVersion::kVersion)) {
     VALIDATION_LOG << "Unsupported shader bundle format version: "
                    << bundle->format_version()
-                   << ". Expected: " << impeller::compiler::kShaderBundleFormatVersion;
+                   << ". Expected: " << static_cast<uint32_t>(impeller::fb::shaderbundle::ShaderBundleFormatVersion::kVersion);
     return nullptr;
   }
 

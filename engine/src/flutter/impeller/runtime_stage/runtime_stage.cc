@@ -12,7 +12,6 @@
 #include "impeller/core/runtime_types.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/runtime_stage/runtime_stage_flatbuffers.h"
-#include "impeller/compiler/shader_bundle.h"
 #include "runtime_stage_types_flatbuffers.h"
 
 namespace impeller {
@@ -75,10 +74,10 @@ RuntimeStage::Map RuntimeStage::DecodeRuntimeStages(
   }
 
   // Check format version compatibility
-  if (raw_stages->format_version() != impeller::compiler::kRuntimeStagesFormatVersion) {
+  if (raw_stages->format_version() != static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion)) {
     VALIDATION_LOG << "Unsupported runtime stages format version: "
                    << raw_stages->format_version()
-                   << ". Expected: " << impeller::compiler::kRuntimeStagesFormatVersion;
+                   << ". Expected: " << static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion);
     return {};
   }
 
